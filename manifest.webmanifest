@@ -1,0 +1,14 @@
+{
+  "name": "Καιρός Ιεράπετρας",
+  "short_name": "Ιεράπετρα",
+  "lang": "el",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0d1d24",
+  "theme_color": "#0b6f8a",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
