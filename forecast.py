@@ -1,6 +1,6 @@
 """Υπολογίζει τη σταθμισμένη πρόγνωση για την Ιεράπετρα και τη γράφει στο forecast.json.
 Χρησιμοποιεί μόνο την τυπική βιβλιοθήκη της Python."""
-import json, math, urllib.request
+import json, math, urllib.request, urllib.error, time
 from datetime import date, datetime, timedelta, timezone
 
 LAT, LON = 35.01, 25.74
@@ -13,8 +13,27 @@ DIRNAMES = ["Βόρειος", "Βορειοανατολικός", "Ανατολ�
 COMPASS = ["Β", "ΒΑ", "Α", "ΝΑ", "Ν", "ΝΔ", "Δ", "ΒΔ"]
 
 def get(url):
-    with urllib.request.urlopen(url, timeout=60) as r:
-        return json.load(r)
+    for attempt in range(3):
+        try:
+            req = urllib.request.Request(
+                url,
+                headers={"User-Agent": "IerapetraWeather/1.0"}
+            )
+            with urllib.request.urlopen(req, timeout=60) as r:
+                return json.load(r)
+
+        except urllib.error.HTTPError as e:
+            if e.code == 429 and attempt < 2:
+                retry_after = e.headers.get("Retry-After")
+                try:
+                    wait = min(300, max(1, int(retry_after)))
+                except (TypeError, ValueError):
+                    wait = 30 * (2 ** attempt)
+
+                print(f"HTTP 429. Waiting {wait}s...")
+                time.sleep(wait)
+            else:
+                raise
 
 def avg(xs):
     v = [x for x in xs if x is not None]
