@@ -72,6 +72,11 @@ def get_weights():
         print("weights failed:", e)
         return ones, False
 
+def icon(rain, gust):
+    if rain >= 5: return "🌧️"
+    if rain >= 1: return "🌦️"
+    return "💨" if gust >= GUST_WARN else "☀️"
+
 def day_text(o):
     p = ["Βροχερή μέρα." if o["rain"] >= 5 else "Πιθανές τοπικές βροχές." if o["rain"] >= 1 else "Χωρίς βροχή."]
     p.append(f"Θερμοκρασία από {o['tmin']}° έως {o['tmax']}°.")
@@ -97,6 +102,9 @@ def main():
              "gust": round(wavg(col("wind_gusts_10m_max"), W)), "dir": None if dirv is None else round(dirv)}
         o["dir_text"] = "" if o["dir"] is None else COMPASS[round(o["dir"] / 45) % 8]
         o["bft"] = bft(o["wind"])
+        o["gust_bft"] = bft(o["gust"])
+        o["short"] = o["name"][:3]
+        o["icon"] = icon(o["rain"], o["gust"])
         o["text"] = day_text(o)
         out["days"].append(o)
         for k, v in o.items():            # επίπεδα κλειδιά (d0_tmax κ.λπ.) για εύκολη ανάγνωση από το widget
@@ -107,3 +115,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+              
