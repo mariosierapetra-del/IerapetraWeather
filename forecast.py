@@ -72,10 +72,14 @@ def get_weights():
         print("weights failed:", e)
         return ones, False
 
-def icon(rain, gust):
+def icon(rain, gust, cloud=None):
     if rain >= 5: return "🌧️"
     if rain >= 1: return "🌦️"
-    return "💨" if gust >= GUST_WARN else "☀️"
+    if gust >= GUST_WARN: return "💨"
+    if cloud is None or cloud < 25: return "☀️"
+    if cloud < 50: return "🌤️"
+    if cloud < 75: return "⛅"
+    return "☁️"
 
 def day_text(o):
     p = ["Βροχερή μέρα." if o["rain"] >= 5 else "Πιθανές τοπικές βροχές." if o["rain"] >= 1 else "Χωρίς βροχή."]
@@ -89,7 +93,7 @@ def main():
     weights, ok = get_weights()
     W = [weights[m] for m in KEYS]
     url = ("https://api.open-meteo.com/v1/forecast" f"?latitude={LAT}&longitude={LON}"
-           "&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant"
+           "&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant,cloud_cover_mean"
            f"&models={','.join(KEYS)}&timezone=Europe%2FAthens&forecast_days=5")
     d = get(url)["daily"]
     out = {"updated": datetime.now(timezone.utc).isoformat(timespec="minutes"), "weights_ok": ok, "days": []}
@@ -104,7 +108,9 @@ def main():
         o["bft"] = bft(o["wind"])
         o["gust_bft"] = bft(o["gust"])
         o["short"] = o["name"][:3]
-        o["icon"] = icon(o["rain"], o["gust"])
+        cl = wavg(col("cloud_cover_mean"), W)
+        o["cloud"] = None if cl is None else round(cl)
+        o["icon"] = icon(o["rain"], o["gust"], o["cloud"])
         o["text"] = day_text(o)
         out["days"].append(o)
         for k, v in o.items():            # επίπεδα κλειδιά (d0_tmax κ.λπ.) για εύκολη ανάγνωση από το widget
@@ -115,4 +121,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-              
+          
