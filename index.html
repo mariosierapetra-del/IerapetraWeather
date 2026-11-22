@@ -275,6 +275,14 @@ async function loadNow() {
 load();
 loadNow();
 
+// Ανανέωση όταν επιστρέφεις στην εφαρμογή ή όσο μένει ανοιχτή (αν έχουν περάσει 30 λεπτά)
+let lastLoad = Date.now();
+function refreshIfOld() {
+  if (Date.now() - lastLoad > 30 * 60 * 1000) { lastLoad = Date.now(); load(); loadNow(); }
+}
+document.addEventListener("visibilitychange", () => { if (!document.hidden) refreshIfOld(); });
+setInterval(refreshIfOld, 5 * 60 * 1000);
+
 try { if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js'); } catch (e) {}
 </script>
 </body>
