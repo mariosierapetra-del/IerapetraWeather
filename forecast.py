@@ -15,25 +15,39 @@ COMPASS = ["Β", "ΒΑ", "Α", "ΝΑ", "Ν", "ΝΔ", "Δ", "ΒΔ"]
 def get(url):
     for attempt in range(3):
         try:
+            print(f"Request {attempt + 1}/3: {url}", flush=True)
+
             req = urllib.request.Request(
                 url,
                 headers={"User-Agent": "IerapetraWeather/1.0"}
             )
+
             with urllib.request.urlopen(req, timeout=60) as r:
                 return json.load(r)
 
         except urllib.error.HTTPError as e:
-            if e.code == 429 and attempt < 2:
+            if e.code in (429, 500, 502, 503, 504) and attempt < 2:
                 retry_after = e.headers.get("Retry-After")
+
                 try:
                     wait = min(300, max(1, int(retry_after)))
                 except (TypeError, ValueError):
                     wait = 30 * (2 ** attempt)
 
-                print(f"HTTP 429. Waiting {wait}s...")
+                print(f"HTTP {e.code}. Waiting {wait}s...", flush=True)
                 time.sleep(wait)
             else:
                 raise
+
+        except (urllib.error.URLError, TimeoutError, OSError) as e:
+            print(f"Connection error: {e}", flush=True)
+
+            if attempt < 2:
+                print("Retrying in 15 seconds...", flush=True)
+                time.sleep(15)
+            else:
+                raise
+
 
 def avg(xs):
     v = [x for x in xs if x is not None]
