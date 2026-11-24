@@ -2,7 +2,7 @@
 Χρησιμοποιεί μόνο την τυπική βιβλιοθήκη της Python."""
 import json, math, urllib.request, urllib.error, time
 from datetime import date, datetime, timedelta, timezone
-
+το
 LAT, LON = 35.01, 25.74
 GUST_WARN = 50
 MODELS = {"ecmwf_ifs025": "ECMWF", "gfs_seamless": "GFS", "icon_seamless": "ICON", "icon_eu": "ICON-EU",
@@ -129,7 +129,15 @@ def main():
            "&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant,cloud_cover_mean"
            f"&models={','.join(KEYS)}&timezone=Europe%2FAthens&forecast_days=5")
     d = get(url)["daily"]
-    out = {"updated": datetime.now(timezone.utc).isoformat(timespec="minutes"), "weights_ok": ok, "days": []}
+    out = {
+    "updated": datetime.now(timezone.utc).isoformat(timespec="minutes"),
+    "weights_ok": ok,
+    "weights": {
+        MODELS[m]: round(weights[m], 2)
+        for m in KEYS
+    },
+    "days": []
+}
     for i, day in enumerate(d["time"]):
         col = lambda f: [at(d, f, m, i) for m in KEYS]
         dirv = dir_mean(col("wind_direction_10m_dominant"), W)
