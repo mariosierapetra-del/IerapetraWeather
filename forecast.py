@@ -2,7 +2,6 @@
 Χρησιμοποιεί μόνο την τυπική βιβλιοθήκη της Python."""
 import json, math, urllib.request, urllib.error, time
 from datetime import date, datetime, timedelta, timezone
-το
 LAT, LON = 35.01, 25.74
 GUST_WARN = 50
 MODELS = {"ecmwf_ifs025": "ECMWF", "gfs_seamless": "GFS", "icon_seamless": "ICON", "icon_eu": "ICON-EU",
